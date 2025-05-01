@@ -1,7 +1,6 @@
 import { slugify } from "@/utils/commonFunction";
 import { BlogType } from "@/utils/modal";
 import { Metadata } from "next";
-import React from "react";
 import BlogClient from "./BlogClient";
 
 interface BlogPostPageProps {
@@ -9,35 +8,47 @@ interface BlogPostPageProps {
 }
 
 export async function generateMetadata({
-  params: { title },
+  params,
 }: BlogPostPageProps): Promise<Metadata> {
+  const { title } = await params;
+  console.log("title :", title);
   const response = await fetch(
-    "https://todo-backend-zwg4.onrender.com/blogs/list"
+    `https://todo-backend-zwg4.onrender.com/blogs/list`
   );
-  const data = await response.json();
-  const blogData = data.data.filter(
-    (blog: BlogType) => slugify(blog.title) === title
-  )[0];
-  if (!blogData) {
-    return {
-      title: "Blog Not Found",
-      description: "This blog post does not exist.",
-    };
-  }
-
+  const post: { message: string; success: boolean; data: BlogType[] } =
+    await response.json();
+  const postData: BlogType[] = post.data.filter(
+    (post: BlogType) => slugify(post.title) === title
+  );
+  console.log("data ---------------=-", postData);
+  const currentPost: BlogType = postData[0];
+  console.log("current post :   ", currentPost);
   return {
-    title: blogData?.title,
-    description: blogData?.description,
+    title: currentPost.title,
+    description: currentPost.description,
     openGraph: {
-      title: blogData?.title,
-      description: blogData?.description,
-      images: [blogData?.imageUrl],
+      title: currentPost.title,
+      description: currentPost.description,
+      images: [currentPost.imageUrl],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: currentPost.title,
+      description: currentPost.description,
+      images: [currentPost.imageUrl],
     },
   };
 }
 
-const Blog = ({ params: { title } }: BlogPostPageProps) => {
-  return <BlogClient title={title} />;
-};
+export default async function BlogPostPage(props: {
+  params: { title: string };
+}) {
+  const { title } = await props.params;
+  console.log("title :", title);
+  const response = await fetch(
+    `https://todo-backend-zwg4.onrender.com/blogs/list`
+  );
+  console.log("response :::::::::", response);
 
-export default Blog;
+  return <BlogClient title={title} />;
+}
