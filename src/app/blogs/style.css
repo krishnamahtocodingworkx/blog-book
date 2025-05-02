@@ -27,4 +27,9 @@
   font-weight: 600;
   line-height: 1.5rem;
   margin: 1rem 0;
+  cursor: pointer;
+  transition: color 300ms ease-in-out;
+}
+.card-title:hover {
+  color: var(--color-emerald-600);
 }

@@ -3,21 +3,34 @@ import React, { useEffect, useState } from "react";
 import "./style.css";
 import BlogCard from "../components/BlogCard";
 import { BlogType } from "@/utils/modal";
+import Loading from "../components/Loading";
+import Heading from "../components/Heading";
+import { String } from "@/utils/constants";
 
 const BlogsPage = () => {
   const [blogs, setBlogs] = useState<BlogType[]>([]);
+  const [loading, setLoading] = useState(true);
   async function fetchBlogs() {
-    const response = await fetch(
-      "https://todo-backend-zwg4.onrender.com/blogs/list"
-    );
-    const data = await response.json();
-    if (data.success) {
-      setBlogs(data.data);
+    try {
+      const response = await fetch(
+        "https://todo-backend-zwg4.onrender.com/blogs/list"
+      );
+      const data = await response.json();
+      if (data.success) {
+        setBlogs(data.data);
+      }
+    } catch (error) {
+      console.log("Error in blog fetching :", error);
+    } finally {
+      setLoading(false);
     }
   }
   useEffect(() => {
     fetchBlogs();
   }, []);
+  if (loading) {
+    return <Loading />;
+  }
   return (
     <section className="">
       {blogs.length > 0 ? (
@@ -27,7 +40,7 @@ const BlogsPage = () => {
           ))}
         </section>
       ) : (
-        <h2>No data found</h2>
+        <Heading heading={String.Blogs_Not_Found} />
       )}
     </section>
   );
