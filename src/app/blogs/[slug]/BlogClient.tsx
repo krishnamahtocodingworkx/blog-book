@@ -11,7 +11,6 @@ const BlogClient: React.FC<{ title: string }> = ({ title }) => {
       "https://todo-backend-zwg4.onrender.com/blogs/list"
     );
     const data = await response.json();
-    console.log(data);
     if (data.success) {
       const blogData = data.data.filter(
         (blog: BlogType) => slugify(blog.title) === title
@@ -22,7 +21,6 @@ const BlogClient: React.FC<{ title: string }> = ({ title }) => {
   useEffect(() => {
     fetchBlogs();
   }, []);
-  console.log(blog);
   if (!blog) return <h2>Blog not found</h2>;
   return (
     <div className="blog--container">

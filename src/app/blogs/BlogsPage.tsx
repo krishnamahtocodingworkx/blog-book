@@ -11,7 +11,6 @@ const BlogsPage = () => {
       "https://todo-backend-zwg4.onrender.com/blogs/list"
     );
     const data = await response.json();
-    console.log(data);
     if (data.success) {
       setBlogs(data.data);
     }
@@ -19,7 +18,6 @@ const BlogsPage = () => {
   useEffect(() => {
     fetchBlogs();
   }, []);
-  console.log(blogs);
   return (
     <section className="">
       {blogs.length > 0 ? (
