@@ -1,19 +1,17 @@
 "use client";
-import { slugify } from "@/utils/commonFunction";
 import { BlogCardProps } from "@/utils/modal";
 import { useRouter } from "next/navigation";
 import React from "react";
 const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
   const router = useRouter();
   const handleClick = () => {
-    const title = slugify(blog.title);
-    router.push(`/blogs/${title}`);
+    router.push(`/blogs/${blog.slug}`);
   };
   return (
     <section className="blog--card">
       <figure className="blog--image-container">
         <img
-          src={blog.imageUrl}
+          src={blog.coverImageUrl}
           alt="Picture of the author"
           className="image--cover"
           loading="lazy"

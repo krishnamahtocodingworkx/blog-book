@@ -12,12 +12,11 @@ const BlogsPage = () => {
   const [loading, setLoading] = useState(true);
   async function fetchBlogs() {
     try {
-      const response = await fetch(
-        "https://todo-backend-zwg4.onrender.com/blogs/list"
-      );
+      const response = await fetch("/api/blogs");
       const data = await response.json();
+      console.log("response ::::::::::", data);
       if (data.success) {
-        setBlogs(data.data);
+        setBlogs(data.result);
       }
     } catch (error) {
       console.log("Error in blog fetching :", error);
@@ -28,6 +27,7 @@ const BlogsPage = () => {
   useEffect(() => {
     fetchBlogs();
   }, []);
+  console.log("result :", blogs);
   if (loading) {
     return <Loading />;
   }

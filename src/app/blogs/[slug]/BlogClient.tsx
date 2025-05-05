@@ -1,5 +1,4 @@
 "use client";
-import { slugify } from "@/utils/commonFunction";
 import { BlogType } from "@/utils/modal";
 import React, { useEffect, useState } from "react";
 import "./style.css";
@@ -12,15 +11,10 @@ const BlogClient: React.FC<{ title: string }> = ({ title }) => {
   const [loading, setLoading] = useState(true);
   async function fetchBlogs() {
     try {
-      const response = await fetch(
-        "https://todo-backend-zwg4.onrender.com/blogs/list"
-      );
+      const response = await fetch(`/api/blogs/${title}`);
       const data = await response.json();
       if (data.success) {
-        const blogData = data.data.filter(
-          (blog: BlogType) => slugify(blog.title) === title
-        )[0];
-        setBlog(blogData);
+        setBlog(data.result);
       }
     } catch (error) {
       console.log("Error in blog fetching :", error);
@@ -38,7 +32,7 @@ const BlogClient: React.FC<{ title: string }> = ({ title }) => {
   return (
     <div className="blog--container">
       <figure className="blog--image-container">
-        <img src={blog?.imageUrl} alt="" className="image--cover" />
+        <img src={blog.coverImageUrl} alt="" className="image--cover" />
       </figure>
       <h2 className="blog--title">{blog?.title}</h2>
       <p>{blog?.description}</p>

@@ -3,10 +3,11 @@ export type BlogCardProps = {
 };
 export type BlogType = {
   title: string;
-  imageUrl: string;
+  coverImageUrl: string;
   author: string;
   conclusion: string;
   description: string;
   _id: string;
   __v: number;
+  slug: string;
 };
