@@ -19,7 +19,7 @@ const BlogClient: React.FC<{ title: string }> = ({ title }) => {
         setBlog(data.result);
       }
     } catch (error) {
-      // console.log("Error in blog fetching :", error);
+      console.log("Error in blog fetching :", error);
     } finally {
       setLoading(false);
     }
