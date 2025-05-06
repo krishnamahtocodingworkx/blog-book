@@ -1,26 +1,60 @@
 "use client";
-import React from "react";
+import Image from "next/image";
+import React, { useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 
 type Section = {
   heading: string;
   content: string;
   imageUrl: string;
+  imageFile?: File;
+  imagePreview?: string;
 };
 
 type FormData = {
   title: string;
   coverImageUrl: string;
+  coverImageFile?: File;
+  coverImagePreview?: string;
   description: string;
   authorName: string;
   data: Section[];
 };
 
+async function uploadImage(file: File): Promise<string> {
+  // Convert file to base64
+  const toBase64 = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+    });
+
+  const base64 = await toBase64(file);
+
+  const res = await fetch("/api/upload", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ image: base64 }),
+  });
+  const data = await res.json();
+  if (!data.success) throw new Error(data.message || "Image upload failed");
+  return data.result.secure_url;
+}
+
 export default function CreateBlog() {
+  const [coverImagePreview, setCoverImagePreview] = useState<string | null>(
+    null
+  );
+  const [sectionPreviews, setSectionPreviews] = useState<(string | null)[]>([]);
+
   const {
     register,
     control,
     handleSubmit,
+    setValue,
+    getValues,
     formState: { errors },
   } = useForm<FormData>({
     defaultValues: {
@@ -33,32 +67,103 @@ export default function CreateBlog() {
     name: "data",
   });
 
+  // Cover image file handler
+  const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setValue("coverImageFile", file);
+      const reader = new FileReader();
+      reader.onloadend = () => setCoverImagePreview(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Section image file handler
+  const handleSectionImageChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    idx: number
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Set file in react-hook-form
+      const data = getValues("data");
+      data[idx].imageFile = file;
+      setValue("data", data);
+
+      // Set preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSectionPreviews((prev) => {
+          const newPreviews = [...prev];
+          newPreviews[idx] = reader.result as string;
+          return newPreviews;
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Add a new section and its preview
+  const handleAddSection = () => {
+    append({ heading: "", content: "", imageUrl: "" });
+    setSectionPreviews((prev) => [...prev, null]);
+  };
+
+  // Remove a section and its preview
+  const handleRemoveSection = (idx: number) => {
+    remove(idx);
+    setSectionPreviews((prev) => prev.filter((_, i) => i !== idx));
+  };
+
   const onSubmit = async (data: FormData) => {
     try {
-      console.log("Form Data:", data);
+      // 1. Upload cover image if it's a File
+      let coverImageUrl = data.coverImageUrl;
+      if (data.coverImageFile && data.coverImageFile instanceof File) {
+        coverImageUrl = await uploadImage(data.coverImageFile);
+      }
 
+      // 2. Upload section images if they're Files
+      const sections = await Promise.all(
+        data.data.map(async (section) => {
+          let imageUrl = section.imageUrl;
+          if (section.imageFile && section.imageFile instanceof File) {
+            imageUrl = await uploadImage(section.imageFile);
+          }
+          return {
+            heading: section.heading,
+            content: section.content,
+            imageUrl,
+          };
+        })
+      );
+
+      // 3. Prepare the blog data for POST
+      const blogData = {
+        title: data.title,
+        coverImageUrl,
+        description: data.description,
+        authorName: data.authorName,
+        data: sections,
+      };
+
+      // 4. Send blog data to backend
       const response = await fetch("/api/blogs", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(blogData),
       });
 
       if (!response.ok) {
-        // Server responded with error status
         const errorData = await response.json();
-        console.error("Server error:", errorData);
         alert(`Error: ${errorData.message || "Failed to create blog"}`);
         return;
       }
 
-      const res = await response.json();
-      console.log("Response:", res);
       alert("Blog created successfully!");
       // Optionally reset form or redirect user here
     } catch (error) {
-      console.error("Network or unexpected error:", error);
+      console.log("error :", error);
       alert("An unexpected error occurred. Please try again.");
     }
   };
@@ -87,29 +192,26 @@ export default function CreateBlog() {
           )}
         </div>
 
-        {/* Cover Image URL */}
+        {/* Cover Image */}
         <div>
-          <label className="block font-semibold mb-1" htmlFor="coverImageUrl">
-            Cover Image URL <span className="text-red-600">*</span>
+          <label className="block font-semibold mb-1" htmlFor="coverImageFile">
+            Cover Image <span className="text-red-600">*</span>
           </label>
           <input
-            id="coverImageUrl"
-            type="string"
-            {...register("coverImageUrl", {
-              required: "Cover Image URL is required",
-              pattern: {
-                value: /^https?:\/\/.+/,
-                message: "Enter a valid URL",
-              },
-            })}
-            className={`w-full border rounded px-3 py-2 ${
-              errors.coverImageUrl ? "border-red-500" : "border-gray-300"
-            }`}
+            id="coverImageFile"
+            type="file"
+            accept="image/*"
+            onChange={handleCoverImageChange}
+            className="w-full border rounded px-3 py-2"
           />
-          {errors.coverImageUrl && (
-            <p className="text-red-600 text-sm mt-1">
-              {errors.coverImageUrl.message}
-            </p>
+          {coverImagePreview && (
+            <Image
+              src={coverImagePreview}
+              alt="Cover Preview"
+              className="mt-2 max-h-48 rounded"
+              height={200}
+              width={200}
+            />
           )}
         </div>
 
@@ -161,7 +263,7 @@ export default function CreateBlog() {
             >
               <button
                 type="button"
-                onClick={() => remove(index)}
+                onClick={() => handleRemoveSection(index)}
                 className="absolute top-2 right-2 text-red-600 font-bold hover:text-red-800"
                 aria-label={`Remove section ${index + 1}`}
               >
@@ -221,33 +323,29 @@ export default function CreateBlog() {
                 )}
               </div>
 
-              {/* Image URL */}
+              {/* Section Image */}
               <div>
                 <label
-                  htmlFor={`data.${index}.imageUrl`}
+                  htmlFor={`data.${index}.imageFile`}
                   className="block font-semibold mb-1"
                 >
-                  Image URL
+                  Section Image
                 </label>
                 <input
-                  id={`data.${index}.imageUrl`}
-                  type="string"
-                  {...register(`data.${index}.imageUrl` as const, {
-                    pattern: {
-                      value: /^https?:\/\/.+/,
-                      message: "Enter a valid URL",
-                    },
-                  })}
-                  className={`w-full border rounded px-3 py-2 ${
-                    errors.data?.[index]?.imageUrl
-                      ? "border-red-500"
-                      : "border-gray-300"
-                  }`}
+                  id={`data.${index}.imageFile`}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleSectionImageChange(e, index)}
+                  className="w-full border rounded px-3 py-2"
                 />
-                {errors.data?.[index]?.imageUrl && (
-                  <p className="text-red-600 text-sm mt-1">
-                    {errors.data[index]?.imageUrl?.message}
-                  </p>
+                {sectionPreviews[index] && (
+                  <Image
+                    src={sectionPreviews[index] as string}
+                    alt={`Section ${index + 1} Preview`}
+                    className="mt-2 max-h-40 rounded"
+                    height={200}
+                    width={200}
+                  />
                 )}
               </div>
             </div>
@@ -255,7 +353,7 @@ export default function CreateBlog() {
 
           <button
             type="button"
-            onClick={() => append({ heading: "", content: "", imageUrl: "" })}
+            onClick={handleAddSection}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
             + Add Section

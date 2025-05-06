@@ -5,6 +5,8 @@ import "./style.css";
 import Loading from "@/app/components/Loading";
 import Heading from "@/app/components/Heading";
 import { String } from "@/utils/constants";
+import BlogSection from "@/app/components/BlogSection";
+import Image from "next/image";
 
 const BlogClient: React.FC<{ title: string }> = ({ title }) => {
   const [blog, setBlog] = useState<BlogType | null>(null);
@@ -32,10 +34,28 @@ const BlogClient: React.FC<{ title: string }> = ({ title }) => {
   return (
     <div className="blog--container">
       <figure className="blog--image-container">
-        <img src={blog.coverImageUrl} alt="" className="image--cover" />
+        <Image
+          src={blog.coverImageUrl}
+          alt="banner"
+          className="image--cover"
+          height={200}
+          width={300}
+          priority
+        />
       </figure>
       <h2 className="blog--title">{blog?.title}</h2>
       <p>{blog?.description}</p>
+      <section className="flex flex-col gap-8">
+        {blog?.data.map((section) => (
+          <BlogSection
+            key={section._id}
+            _id={section._id}
+            imageUrl={section.imageUrl}
+            heading={section.heading}
+            content={section.content}
+          />
+        ))}
+      </section>
     </div>
   );
 };

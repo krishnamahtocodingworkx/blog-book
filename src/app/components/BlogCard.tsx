@@ -1,5 +1,6 @@
 "use client";
 import { BlogCardProps } from "@/utils/modal";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React from "react";
 const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
@@ -10,11 +11,13 @@ const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
   return (
     <section className="blog--card">
       <figure className="blog--image-container">
-        <img
+        <Image
           src={blog.coverImageUrl}
           alt="Picture of the author"
           className="image--cover"
-          loading="lazy"
+          width={300}
+          height={200}
+          priority
         />
       </figure>
       <h4 onClick={handleClick} className="card-title">

@@ -10,13 +10,14 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const slug = (await params).slug;
-  console.log("slug in generateMetadata", slug);
   const response = await fetch(
     `https://todo-backend-zwg4.onrender.com/blogs/list`
   );
   const data = await response.json();
   const blogs: BlogType[] = data.data;
-  const blog:BlogType = blogs.filter((blog:BlogType) => slugify(blog.title) === slug)[0];
+  const blog: BlogType = blogs.filter(
+    (blog: BlogType) => slugify(blog.title) === slug
+  )[0];
 
   return {
     title: blog.title,

@@ -10,24 +10,36 @@ import { String } from "@/utils/constants";
 const BlogsPage = () => {
   const [blogs, setBlogs] = useState<BlogType[]>([]);
   const [loading, setLoading] = useState(true);
-  async function fetchBlogs() {
-    try {
-      const response = await fetch("/api/blogs");
-      const data = await response.json();
-      console.log("response ::::::::::", data);
-      if (data.success) {
-        setBlogs(data.result);
-      }
-    } catch (error) {
-      console.log("Error in blog fetching :", error);
-    } finally {
-      setLoading(false);
-    }
-  }
+  // async function fetchBlogs() {
+  //   try {
+  //     const response = await fetch("/api/blogs");
+  //     const data = await response.json();
+  //     if (data.success) {
+  //       setBlogs(data.result);
+  //     }
+  //   } catch (error) {
+  //     console.log("Error in blog fetching :", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }
   useEffect(() => {
+    async function fetchBlogs() {
+      try {
+        const response = await fetch("/api/blogs");
+        const data = await response.json();
+        if (data.success) {
+          setBlogs(data.result);
+        }
+      } catch (error) {
+        console.error("Error in blog fetching :", error);
+      } finally {
+        setLoading(false);
+      }
+    }
     fetchBlogs();
   }, []);
-  console.log("result :", blogs);
+
   if (loading) {
     return <Loading />;
   }
