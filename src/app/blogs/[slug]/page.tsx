@@ -2,7 +2,6 @@ import { BlogType } from "@/utils/modal";
 import { Metadata } from "next";
 import React from "react";
 import BlogClient from "./BlogClient";
-import { slugify } from "@/utils/commonFunction";
 
 export async function generateMetadata({
   params,
@@ -10,14 +9,10 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const slug = (await params).slug;
-  const response = await fetch(
-    `https://todo-backend-zwg4.onrender.com/blogs/list`
-  );
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const response = await fetch(`${baseUrl}/api/blogs/${slug}`);
   const data = await response.json();
-  const blogs: BlogType[] = data.data;
-  const blog: BlogType = blogs.filter(
-    (blog: BlogType) => slugify(blog.title) === slug
-  )[0];
+  const blog: BlogType = data.result;
 
   return {
     title: blog.title,
