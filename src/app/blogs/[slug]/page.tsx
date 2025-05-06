@@ -9,11 +9,13 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const slug = (await params).slug;
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-  const response = await fetch(`${baseUrl}/api/blogs/${slug}`);
+  // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const response = await fetch(
+    `${"https://blog-book-nine.vercel.app"}/api/blogs/${slug}`
+  );
   const data = await response.json();
   const blog: BlogType = data.result;
-
+  // console.log("blog :", blog);
   return {
     title: blog.title,
     description: blog.description,
