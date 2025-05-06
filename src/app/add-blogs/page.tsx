@@ -163,7 +163,7 @@ export default function CreateBlog() {
       alert("Blog created successfully!");
       // Optionally reset form or redirect user here
     } catch (error) {
-      console.log("error :", error);
+      // console.log("error :", error);
       alert("An unexpected error occurred. Please try again.");
     }
   };

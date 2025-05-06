@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Cloudinary upload error:", error);
+    // console.error("Cloudinary upload error:", error);
     return NextResponse.json(
       {
         success: false,
