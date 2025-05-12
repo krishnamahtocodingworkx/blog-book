@@ -6,6 +6,19 @@ import { BlogType } from "@/utils/modal";
 import Loading from "../components/Loading";
 import Heading from "../components/Heading";
 import { String } from "@/utils/constants";
+import { motion } from "framer-motion";
+
+const parentVariant = {
+  hidden: {
+    opacity: 0,
+  },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 1,
+    },
+  },
+};
 
 const BlogsPage = () => {
   const [blogs, setBlogs] = useState<BlogType[]>([]);
@@ -33,11 +46,16 @@ const BlogsPage = () => {
   return (
     <section className="">
       {blogs.length > 0 ? (
-        <section className="blogs-card-container">
+        <motion.section
+          className="blogs-card-container"
+          variants={parentVariant}
+          initial="hidden"
+          animate="visible"
+        >
           {blogs.slice(0, 3).map((blog: BlogType, i: number) => (
             <BlogCard key={i} blog={blog} />
           ))}
-        </section>
+        </motion.section>
       ) : (
         <Heading heading={String.Blogs_Not_Found} />
       )}

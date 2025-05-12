@@ -5,7 +5,7 @@ export type BlogSection = {
   imageUrl?: string;
   heading?: string;
   content?: string;
-  _id:string;
+  _id: string;
 };
 export type BlogType = {
   title: string;
