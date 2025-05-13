@@ -16,6 +16,9 @@ const parentVariant = {
     opacity: 1,
     transition: {
       staggerChildren: 1,
+      delayChildren: 0.5,
+      duration: 1,
+      ease: "linear",
     },
   },
 };

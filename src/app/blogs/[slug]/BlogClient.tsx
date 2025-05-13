@@ -7,6 +7,7 @@ import Heading from "@/app/components/Heading";
 import { String } from "@/utils/constants";
 import BlogSection from "@/app/components/BlogSection";
 import Image from "next/image";
+import RevealAnimation from "@/app/components/RevealAnimation";
 
 const BlogClient: React.FC<{ title: string }> = ({ title }) => {
   const [blog, setBlog] = useState<BlogType | null>(null);
@@ -43,8 +44,12 @@ const BlogClient: React.FC<{ title: string }> = ({ title }) => {
           priority
         />
       </figure>
-      <h2 className="blog--title">{blog?.title}</h2>
-      <p>{blog?.description}</p>
+      <RevealAnimation>
+        <h2 className="blog--title">{blog?.title}</h2>
+      </RevealAnimation>
+      <RevealAnimation leftReveal={false}>
+        <p>{blog?.description}</p>
+      </RevealAnimation>
       <section className="flex flex-col gap-8">
         {blog?.data.map((section) => (
           <BlogSection
