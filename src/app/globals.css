@@ -52,6 +52,10 @@ body {
   transform: scale(1.05);
 }
 
+.custom-button:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
 .page--wrapper {
   width: 100%;
   display: flex;
